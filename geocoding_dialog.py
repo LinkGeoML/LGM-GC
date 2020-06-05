@@ -27,22 +27,19 @@ from PyQt5 import uic,QtWidgets,QtCore
 from PyQt5.QtWidgets import QMainWindow, QLabel, QGridLayout, QWidget, QMenu,QAction,QPushButton,QFileDialog,QInputDialog,QLineEdit,QMessageBox,QDialog,QProgressBar,QTableWidget,QTableWidgetItem,QTableView,QHBoxLayout,QCheckBox,QVBoxLayout,QDockWidget 
 from PyQt5.QtCore import QSize
 from PyQt5.QtGui import *
- 
 from PyQt5.QtCore import *
 from qgis.PyQt.QtWidgets import QWidget
 from qgis.core import *
 from qgis.core import QgsFeature
 from qgis.gui import *
-#from qgis.gui import QgsMapLayerRegistry
 import qgis.utils
 from functools import partial
 from qgis.PyQt import QtWidgets
-
 from .geocoding_dialog2 import geo_coding_dialog_base2
 
 default_path=QgsApplication.qgisSettingsDirPath() + "\python\plugins"  #OS independent default  path for qgis plugins
 os.chdir(default_path)
-        ##os.chdir(f'C:\\Users\\{text_user}\\AppData\\Roaming\\QGIS\\QGIS3\\profiles\\default\\python\\plugins')
+        
 temp1=os.getcwd()
 temp2=os.listdir(path=str(temp1))               
 
@@ -51,10 +48,6 @@ if 'geocoding' in temp2:
 	
 if not sys.path==(os.getcwd() + '\\LGM-Geocoding-master'):
     sys.path.append(os.getcwd() + '\\LGM-Geocoding-master')
-
-
-
-
 # This loads your .ui file so that PyQt can populate your plugin with the elements from Qt Designer
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'geocoding2_dialog_base.ui'))
@@ -66,14 +59,8 @@ class GeoCodingDialog(QtWidgets.QDialog, FORM_CLASS):
 		"""Constructor."""
 		super(GeoCodingDialog, self).__init__(parent)
 		self.myiface = myiface
-        # Set up the user interface from Designer through FORM_CLASS.
-        # After self.setupUi() you can access any designer object by doing
-        # self.<objectname>, and you can use autoconnect slots - see
-        # http://qt-project.org/doc/qt-4.8/designer-using-a-ui-file.html
-        # #widgets-and-dialogs-with-auto-connect
-		self.setupUi(self)
-		self.TrainingSectionbtn.clicked.connect(self.TrainingSectionbtncliked)          #  <-----   utf-8
-		
+        self.setupUi(self)
+		self.TrainingSectionbtn.clicked.connect(self.TrainingSectionbtncliked)          
 		self.choosepoifilefilebtn.clicked.connect(self.choosepoifilefilebtncliked)
 		self.model_deploymentbtn.clicked.connect(self.model_deploymentbtn_clicked)
 		self.showresultsbtn.clicked.connect(self.showresultsbtncliked)
@@ -81,36 +68,20 @@ class GeoCodingDialog(QtWidgets.QDialog, FORM_CLASS):
 		self.myupdatebtn.clicked.connect(self.myupdatebtncliked)
 		self.load_user_btn.clicked.connect(self.load_user_btn_clicked)
 		self.auto_selectbtn.clicked.connect(self.auto_selectbtn_clicked)
-		
 		self.tableWidget.setContextMenuPolicy(Qt.CustomContextMenu)
-		#self.tableWidget.customContextMenuRequested.connect(self.tableWidgetpopup)
 		self.tableWidget.customContextMenuRequested.connect(self.tableWidgetpopup2)
 	
 	###################################
 	#    MODEL     RUNNING     SECTION #
 	###################################
 
-	
-	
-	#the original csv file doesn't have id.
-	#iterate the original file and write the appropriate id
-	# to be used in the loaded layer attributes
 	def TrainingSectionbtncliked(self):  
-		
 		self.dlg = geo_coding_dialog_base2(self.myiface)
 		self.dlg.show()
-            # Run the dialog event loop
-        #result = self.dlg.exec_()	
-		
-	def choosepoifilefilebtncliked(self):   
-		#fd=QFileDialog()
-		#test_file = ".\\LGM-Geocoding-master\\geocoding-dataset"
-		#mfullstr=str(fd.getOpenFileName(self,"Open POI File ",test_file) )  #mfullstr contains a <class 'str'> of ('full poi path', All files(*)')
-		#QMessageBox.information( self,"Info", print(type(mfullstr))) #################################################
+    def choosepoifilefilebtncliked(self):   
 		QMessageBox.information(self,"INFO","Choose input file")
 		try:
 			fd=QFileDialog()
-			#test_file = "C:\\Users\\Public\\Documents" # recomended to show Documents folder for the user
 			test_file = ".\\LGM-Geocoding-master\\geocoding-dataset"
 			mfullstr=str(fd.getOpenFileName(self,"Open POI File to Classify ",test_file))
 			fname=mfullstr[2:mfullstr.index("'", 4, 1000)] # fname has the full path of the desired poi file
@@ -123,7 +94,6 @@ class GeoCodingDialog(QtWidgets.QDialog, FORM_CLASS):
 			csv_file.close()
 			
 		except FileNotFoundError:  # check if cancel or x is pressed
-			#self.QLineEdit.clear()
 			QMessageBox.information(self,"CAUTION","File Selection Canceled")
 			self.choosepoifilefilechoosenfile.clear() #clears line
 			
@@ -136,7 +106,6 @@ class GeoCodingDialog(QtWidgets.QDialog, FORM_CLASS):
 		file_arcgis = self.last_exp_file() + "\\model_deployment_results\\arcgis.csv"     # file containing 'arcgis' category
 		file_nominatim = self.last_exp_file() + "\\model_deployment_results\\nominatim.csv" # file containing 'nominatim' category
 		with open(predictions_csv,'r',newline='', encoding=' utf-8') as userfile , open(fname,'r',newline='', encoding=' utf-8')as inputfile:
-			#with open("C:\\gits\\test_input.csv",'r',newline='', encoding='utf-8')as inputfile:
 			with open(file_original,'w',newline='') as original , open(file_arcgis,'w',newline='') as arcgis , open(file_nominatim,'w',newline='') as nominatim:   
 				csv_test_input=csv.reader(inputfile,quoting=csv.QUOTE_MINIMAL,skipinitialspace='True')
 				csv_results=csv.reader(userfile,quoting=csv.QUOTE_MINIMAL,skipinitialspace='True')
@@ -157,62 +126,48 @@ class GeoCodingDialog(QtWidgets.QDialog, FORM_CLASS):
 					for j in csv_test_input:
 						if ("'original'") in temp1:
 							temp1= str(temp1).replace("[","").replace("]","").replace('"','').replace(",","").replace("'","")
-							#print(j[0],temp1,j[1],j[2])
 							wr_original.writerow([j[0],temp1,j[1],j[2]])
 							counter+=1
 						if ("'arcgis'") in temp1:
 							temp1=str(temp1).replace("[","").replace("]","").replace('"','').replace(",","").replace("'","")
-							#print(j[0],temp1,j[3],j[4])
 							wr_arcgis.writerow([j[0],temp1,j[3],j[4]])
 							counter+=1
 						if("'nominatim") in temp1:
 							temp1= str(temp1).replace("[","").replace("]","").replace('"','').replace(",","").replace("'","")
-							#print(j[0],temp1,j[5],j[6])
 							wr_nominatim.writerow([j[0],temp1,j[5],j[6]])
 							counter+=1  
                 
 						if ("'original'") in temp2:
 							temp2=str(temp2).replace("[","").replace("]","").replace('"','').replace(",","").replace("'","")
-							#print(j[0],temp2,j[1],j[2])
 							wr_original.writerow([j[0],temp2,j[1],j[2]])
 							counter+=1      
 						if ("'arcgis'") in temp2:
 							temp2=str(temp2).replace("[","").replace("]","").replace('"','').replace(",","").replace("'","")
-							#print(j[0],temp2,j[3],j[4])
 							wr_arcgis.writerow([j[0],temp2,j[3],j[4]])
 							counter+=1      
 						if ("'nominatim'") in temp2:
 							temp2=str(temp2).replace("[","").replace("]","").replace('"','').replace(",","").replace("'","")
-							#print(j[0],temp2,j[5],j[6])
 							wr_nominatim.writerow([j[0],temp2,j[5],j[6]])
 							counter+=1      
                       
 						if ("'original'") in temp3:
 							temp3=str(temp3).replace("[","").replace("]","").replace('"','').replace(",","").replace("'","")
-							#print(j[0],temp3,j[1],j[2])
 							wr_original.writerow([j[0],temp3,j[1],j[2]])
 							counter+=1      
 						if ("'arcgis'") in temp3:
 							temp3=str(temp3).replace("[","").replace("]","").replace('"','').replace(",","").replace("'","")
-							#print(j[0],temp3,j[3],j[4])
 							wr_arcgis.writerow([j[0],temp3,j[3],j[4]])
 							counter+=1      
 						if ("'nominatim'") in temp3:
 							temp3=str(temp3).replace("[","").replace("]","").replace('"','').replace(",","").replace("'","")
-							#print(j[0],temp3,j[5],j[6])
 							wr_nominatim.writerow([j[0],temp3,j[5],j[6]])
 							counter+=1
-						
 						break
 
-		print(counter)
-		
-		
 		QMessageBox.information(self,"INFO","Load ORIGINAL Category")
 		
 		####  Load 1st layer category - ORIGINAL -  #########
 		uri_original = "file:///" + file_original + "?delimiter={}&xField={}&yField={}".format(",", "x_original", "y_original")	# Need to have that type of file structure
-		#uri = "file:///" + fname + "?d?delimiter=%s&xField=%s&yField=%s" % (",","x_original","y_original")	# Need to have that type of file structure
 		layer_csv = QgsVectorLayer(uri_original, "Roads Classified (original)", 'delimitedtext') # layer constructor
 		#Check if the (uri) file has the appropriate format to load as a layer
 		if not layer_csv.isValid():
@@ -228,28 +183,19 @@ class GeoCodingDialog(QtWidgets.QDialog, FORM_CLASS):
 		layer_settings = QgsVectorLayerSimpleLabeling(layer_settings)
 		layer_csv.setLabelsEnabled(True)
 		layer_csv.setLabeling(layer_settings)
-		#layer_csv.setCrs(QgsCoordinateReferenceSystem(4326))
 		
 		config = layer_csv.editFormConfig()
 		config.setInitCodeSource(1)
 		
-		#avoiding HARDCODING # 
 		default_path=QgsApplication.qgisSettingsDirPath() + "\\python\\plugins\\geocoding"  #OS independent default  path for qgis plugins
 		os.chdir(default_path)
 		uiform = default_path + '.\\tableWidget-for-pois-original.ui'
 		config.setUiForm(uiform) #layout form of the individual pois
 		
-		#uiformcode = default_path + ".\\config_poi_file.py"
-		#config.setInitFilePath(uiformcode)
-		
-		#config.setInitFunction("my_form_open")
 		layer_csv.setEditFormConfig(config)
 		QgsProject.instance().addMapLayer(layer_csv)
-		
-		
 		### Load 2nd  layer Category - ARCGIS - ####
 		QMessageBox.information(self,"INFO","Load ARCGIS Category")
-		
 		uri_arcgis = "file:///" + file_arcgis + "?delimiter={}&xField={}&yField={}".format(",", "x_arcgis", "y_arcgis")
 		layer_arcgis = QgsVectorLayer(uri_arcgis, "Roads Classified (arcgis)", 'delimitedtext') # layer constructor
 		if not layer_arcgis.isValid():
@@ -258,30 +204,21 @@ class GeoCodingDialog(QtWidgets.QDialog, FORM_CLASS):
 		symbol_arcgis = QgsFillSymbol.createSimple(properties_arcgis)
 		symbol_arcgis = QgsMarkerSymbol.createSimple({'name': 'circle', 'color': 'blue','size':'2.5'})
 		layer_arcgis.setRenderer(QgsSingleSymbolRenderer(symbol_arcgis))
-		
 		default_path=QgsApplication.qgisSettingsDirPath() + "\\python\\plugins\\geocoding"  #OS independent default  path for qgis plugins
 		os.chdir(default_path)
-		
 		config_form_arcgis=layer_arcgis.editFormConfig()
 		uiform_arcgis = default_path + '.\\tableWidget-for-pois-arcgis.ui'
 		config_form_arcgis.setUiForm(uiform_arcgis) #layout form of the individual pois
 		layer_arcgis.setEditFormConfig(config_form_arcgis)
-		
 		layer_settings_arcgis  = QgsPalLayerSettings()
 		layer_settings_arcgis.fieldName = "name"
 		layer_settings_arcgis.placement = 4
 		layer_settings_arcgis = QgsVectorLayerSimpleLabeling(layer_settings_arcgis)
 		layer_arcgis.setLabelsEnabled(True)
 		layer_arcgis.setLabeling(layer_settings_arcgis)
-		
 		QgsProject.instance().addMapLayer(layer_arcgis)
-		
-		#config_arcgis = layer_arcgis.editFormConfig()
-		#config_arcgis.setInitCodeSource(1)
-		
 		########### Load 3rd layer Category - NOMINATIM - ##################
 		QMessageBox.information(self,"INFO","Load NOMINATIM Category")
-		
 		uri_nominatim = "file:///" + file_nominatim +"?delimiter={}&xField={}&yField={}".format(",","x_nominatim","y_nominatim")
 		layer_nominatim = QgsVectorLayer(uri_nominatim, "Roads Classified (nominatim)", 'delimitedtext') # layer constructor
 		if not layer_nominatim.isValid():
@@ -290,46 +227,26 @@ class GeoCodingDialog(QtWidgets.QDialog, FORM_CLASS):
 		symbol_nominatim = QgsFillSymbol.createSimple(properties_nominatim)
 		symbol_nominatim = QgsMarkerSymbol.createSimple({'name': 'star', 'color': 'red','size':'5.0'})
 		layer_nominatim.setRenderer(QgsSingleSymbolRenderer(symbol_nominatim))
-		
 		config_form_nominatim = layer_nominatim.editFormConfig()
 		path_nominatim = QgsApplication.qgisSettingsDirPath() + "\\python\\plugins\\geocoding" 
 		uiform_nominatim = path_nominatim + ".\\tableWidget-for-pois-nominatim.ui"
 		config_form_nominatim.setUiForm(uiform_nominatim)
 		layer_nominatim.setEditFormConfig(config_form_nominatim)
-		
 		layer_settings_nominatim = QgsPalLayerSettings()
 		layer_settings_nominatim.fieldName = "name"
 		layer_settings_nominatim.placement = 5
 		layer_settings_nominatim = QgsVectorLayerSimpleLabeling(layer_settings_nominatim)
 		layer_nominatim.setLabelsEnabled(True)
 		layer_nominatim.setLabeling(layer_settings_nominatim)
-		
 		QgsProject.instance().addMapLayer(layer_nominatim)
 		
-	
-	#def my_form_open(dialog, layer, feature):
-		#global tableWidget
-		#global featureid
-		
-		#geom = feature.geometry()
-		#control = dialog.findChild(QWidget, "MyLineEdit")		
-		
-		#feature_id = feature.attribute("POI_id")
-		#poi_table(dialog,tableWidget,feature.attribute("POI_id"))	
-		
-		#tableWidget = dialog.findChild(QTableWidget, "tableWidget")
-			
-						
 	def model_deploymentbtn_clicked(self):
 		global count
-		
 		experiment_path=QFileDialog()
 		exp_path = (experiment_path.getExistingDirectory(self,"Please choose experiment path file",str(os.getcwd()),QFileDialog.ShowDirsOnly)) + "\\\\"
-		
 		while exp_path=='':
 			QMessageBox.warning(self,"CAUTION","No experiment path selected")
 			break
-		
 		fpath = self.choosepoifilefilechoosenfile.text()
 		
 		progress = QProgressBar()
@@ -338,38 +255,28 @@ class GeoCodingDialog(QtWidgets.QDialog, FORM_CLASS):
 		progress.setWindowTitle('Processing..')
 		progress.setAlignment(QtCore.Qt.AlignCenter)
 		progress.show()
-		#time.sleep(1)		
-		
+				
 		if "LGM-Geocoding-master" in str(os.getcwd()):
 			pass
 		else:
 			os.chdir('.\\LGM-Geocoding-master')		
 		
-		
 		command = f'python model_deployment.py -experiment_path {exp_path} -fpath {fpath}'
-		print(exp_path)
-		print(fpath)
-		print()
 		
-		#output = subprocess.check_output(command,shell=True,stderr=subprocess.STDOUT)
 		try:
 			output = subprocess.check_output(command,shell=True,stderr=subprocess.STDOUT)
 		except subprocess.CalledProcessError:
 			QMessageBox.warning(self,"WARNING","Execution of command failed")
-		#print(subprocess.STDOUT)
 		out_put = str(output)
 		
 		
 		QMessageBox.information(self,'INFO',out_put)
-		
-		#exppath = exp_path + "model_deployment_results"
 		csv_filepath = exp_path + "model_deployment_results\\predictions.csv"
-		#csvmyfile = exppath + "\\predictionsrplconverted.csv"
+		
 		csvmyfile = exp_path + "model_deployment_results" +"\\predictionsrplconverted.csv"
 		
 		with open(csv_filepath, newline='', encoding=' utf-8') as csv_file:
 			with open(csvmyfile,"w",newline='') as myfile: 
-				#print('-------')
 				csv_data = csv.reader(csv_file,quoting=csv.QUOTE_MINIMAL,skipinitialspace='True') ###
 				count = 0
 				wr=csv.writer(myfile)
@@ -390,313 +297,129 @@ class GeoCodingDialog(QtWidgets.QDialog, FORM_CLASS):
 			
 #-------------------------------------------------------------	
 	def last_exp_file(self):    
-		#global latest_file
 		if "LGM-Geocoding-master" in os.getcwd():
 			temp1=os.getcwd()
 		else:
 			temp1=os.getcwd() + "\\LGM-Geocoding-master"
-		
-		#temp1=os.getcwd() + "\\LGM-Geocoding-master"
 		temp2=os.listdir(path=str(temp1))
 		latest_file = ""
 		if 'experiments' in temp2:
 			list_of_files = glob.glob(str(temp1) + '\\experiments\\*')  
-			#print(list_of_files)
+			
 			latest_file = max(list_of_files,key=os.path.getctime)
-			#print('inside last_exp_file')
-		#return latest_file
+			
 		else:
 			latest_file = ("")
-		#print(latest_file)
 		return latest_file    
 #----------------------------------------------------------------
-	
 	def showresultsbtncliked(self):
-		##self.createTable(count)
 		csv_filepath = self.last_exp_file() + "\\model_deployment_results\\predictionsrplconverted.csv"
 		with open(csv_filepath, newline='', encoding=' utf-8') as csv_file:
 			csv_data = csv.reader(csv_file)
 			count=0
 			for row in csv_data:
 				count+=1
-		
 		self.createTable(count)
-		
-	
-	def createTable(self,count):    #createTable(self,counter): the working one
-        
-		self.tableWidget.setRowCount(count) 
-		self.tableWidget.setColumnCount(5)  # defore self.tableWidget.setColumnCount(4)
-		
+	def createTable(self,count):    
+        self.tableWidget.setRowCount(count) 
+		self.tableWidget.setColumnCount(5)  
 		rownum=0
-        #exppath = self.last_exp_file() + "\\model_deployment_results"
-        #csv_filepath=eraconfig.exppath+"\\predictionsrplconverted.csv"
-        
-		#csv_filepath = exp_path  + "\\model_deployment_results" + "\\predictionsrplconverted.csv"
-		
-		
-		#-----------------------------------------------------------------
-		#due to the fact that model deployment will always be the last step
-		#the function last_exp_file() finds the last modified folder in experiments path (which is model_deployment_results)
-		#and then the predictionsrplconverted.csv file in model_deployment_results is chosen
-		
-		
-		csv_filepath = self.last_exp_file() + "\\model_deployment_results\\predictionsrplconverted.csv"
-		print(csv_filepath)
-		
-		#QMessageBox.information(self,"Info", csv_filepath)
-		#----------------------------------------------------------------
-		
-		#csv_filepath = "C:\\Users\\ivarkas\\AppData\\Roaming\\QGIS\\QGIS3\\profiles\\default\\python\\plugins\\geocoding\\LGM-Geocoding-master\\experiments\\exp_10-02-2020_10-49-47\\model_deployment_results\\predictionsrplconverted.csv"
-		
+        csv_filepath = self.last_exp_file() + "\\model_deployment_results\\predictionsrplconverted.csv"
 		progress = QProgressBar()
 		progress.setGeometry(200, 80, 250, 20)
 		progress.move(600,600)
 		progress.setWindowTitle('Loading Result Table')
 		progress.setAlignment(QtCore.Qt.AlignCenter)
 		progress.show()
-		
-		with open(csv_filepath, newline='', encoding=' UTF-8') as csv_file:  #encoding changed 'utf-8' --> 'utf-8'
+		with open(csv_filepath, newline='', encoding=' UTF-8') as csv_file:  
 			csv_data = csv.reader(csv_file)
 			rownum = 0
-				
 			for row in csv_data:
-				
 				j=row[2] #row[2] -> category
 				k=row[2]
 				l=row[2]
-				
 				j=str(str(j).split(' ',2)[:2]).replace("'","").replace('"','').replace("[","").replace("]","").replace(",","") 
 				k=str(str(k).split(' ',4)[2:4]).replace("'","").replace('"','').replace("[","").replace("]","").replace(",","") 
 				l=str(str(l).split(' ',6)[4:6]).replace("'","").replace('"','').replace("[","").replace("]","").replace(",","") 
-				
 				if len(str(row))>2:     
-					#layout=QHBoxLayout()
 					item1=QTableWidgetItem(str(row[1])) #address doesn't need checkbox
 					item2=QTableWidgetItem(str(row[0])) #id doesn't need checkbox
-					
-					##checkbox1=QCheckBox(str(row[0]))		
-					##checkbox2=QCheckBox(str(row[1]))
 					checkbox3=QCheckBox(str(j))
 					checkbox4=QCheckBox(str(k))	
 					checkbox5=QCheckBox(str(l))
 					
-					##checkbox1.setCheckState(Qt.Unchecked)
-					##checkbox1.setChecked(False)
-					
-					##checkbox2.setCheckState(Qt.Unchecked)
 					checkbox3.setCheckState(Qt.Unchecked)
 					checkbox4.setCheckState(Qt.Unchecked)
 					checkbox5.setCheckState(Qt.Unchecked)
 					
 					self.tableWidget.setHorizontalHeaderLabels("poi_id address Category1 Category2 Category3".split())
-					
-					##self.tableWidget.setCellWidget(rownum,0,checkbox1)
-					##self.tableWidget.setCellWidget(rownum,1,checkbox2)
-					
 					self.tableWidget.setItem(rownum,0, item2)
 					self.tableWidget.setItem(rownum,1, item1) 
 					self.tableWidget.setCellWidget(rownum,2,checkbox3)
 					self.tableWidget.setCellWidget(rownum,3,checkbox4)
 					self.tableWidget.setCellWidget(rownum,4,checkbox5)
 					
-					
-					#self.tableWidget.resizeColumnsToContents()
-					
-					##self.tableWidget.resizeColumnsToContents()
-					#rownum=rownum+1
-					
-					##print(checkbox3.text() +" " + checkbox4.text()+" " + checkbox5.text())
-					
-					
 				self.tableWidget.resizeColumnsToContents()
 					
 				rownum=rownum+1	
 					
-			#print(checkbox1.text() +" " + checkbox2.text()+" " + checkbox3.text())
-
-			
-			
 			self.tableWidget.setRowCount(rownum)
 		self.tableWidget.cellClicked.connect(self.cell_was_clicked)
 			
-			#self.myupdatebtn.clicked.connect(self.myupdatebtncliked)
+			
 	
 	def myupdatebtncliked(self):
 		global user_path
-		#try:
-			#exp_path=str(QFileDialog.getSaveFileName(self,"Select where to save your CSV choices",("*.csv")))
-			#exp_path=exp_path[2:exp_path.index("'", 4, 1000)]
-		
-		#except FileNotFoundError:
-			#QMessageBox.warning(self,"CAUTION","No file path  specified")
-		
-		
-		#exp_path = self.last_exp_file()
-		
-		
-		#while exp_path=='':
-			#no_exp_path_msg = 'Experiment path not selected. Please choose an experiment path file '
-			#QMessageBox.warning(self,"CAUTION",no_exp_path_msg)
-			#break
-		
-
-	############	#####################################################
 		QMessageBox.information(self,"INFO","Select where to save your choices in a csv file")
 		user_path=str(QFileDialog.getSaveFileName(self,"Select where to save your CSV choices",("*.csv")))
 		user_path=user_path[2:user_path.index("'",4,1000)]
-		
-		
-		
-		#print(user_path)
-		#exp_path = "C:\\Users\\ivarkas\\AppData\\Roaming\\QGIS\\QGIS3\\profiles\\default\\python\\plugins\\geocoding\\LGM-Geocoding-master\\experiments\\exp_11-12-2019_10-52-55"	
-		#user_path="C:\\Users\\ivarkas\\AppData\\Roaming\\QGIS\\QGIS3\\profiles\\default\\python\\plugins\\geocoding\\LGM-Geocoding-master\\experiments\\exp_11-12-2019_10-52-55\\test.csv"	
 		input_csv = self.choosepoifilefilechoosenfile.text()
 		
-		with open(user_path ,'w+',newline='', encoding=' utf-8') as myfile ,open(input_csv,'r',newline='', encoding=' utf-8')as inputfile:        #utf-8
+		with open(user_path ,'w+',newline='', encoding=' utf-8') as myfile ,open(input_csv,'r',newline='', encoding=' utf-8')as inputfile:        
 			csv_test_input=csv.reader(inputfile,quoting=csv.QUOTE_MINIMAL,skipinitialspace='True')
 			wr=csv.writer(myfile,quoting=csv.QUOTE_MINIMAL,escapechar='\n')
 			next(csv_test_input) #ignore csv headers
 			wr.writerow(['address','results','x','y'])
 			for i in range(self.tableWidget.rowCount()):
 				for j in csv_test_input:
-					
 					if self.tableWidget.cellWidget(i,2).isChecked(): # i,2 --> category1
-						
 						temp=self.tableWidget.cellWidget(i,2).text()
 						if("original") in temp:
 							temp = str(temp).replace("[","").replace("]","").replace('"','').replace(",","").replace("'","")
 							wr.writerow([self.tableWidget.item(i,1).text(),temp,j[1],j[2]])	
-							#print(self.tableWidget.item(i,1).text(),temp,j[1],j[2])
-								
 						if("arcgis") in temp:
 							temp = str(temp).replace("[","").replace("]","").replace('"','').replace(",","").replace("'","")
 							wr.writerow([self.tableWidget.item(i,1).text(),temp,j[3],j[4]])	
-							#print(self.tableWidget.item(i,1).text(),temp,j[3],j[4])
-						
 						if("nominatim") in temp:
 							temp = str(temp).replace("[","").replace("]","").replace('"','').replace(",","").replace("'","")
 							wr.writerow([self.tableWidget.item(i,1).text(),temp,j[5],j[6]])	
-							#print(self.tableWidget.item(i,1).text(),temp,j[5],j[6])
-						
-
-
-						
 					if self.tableWidget.cellWidget(i,3).isChecked():  #i,3 --> category2
 						temp=self.tableWidget.cellWidget(i,3).text()
-						
 						if("original") in temp:
 							temp = str(temp).replace("[","").replace("]","").replace('"','').replace(",","").replace("'","")
 							wr.writerow([self.tableWidget.item(i,1).text(),temp,j[1],j[2]])	
-							#print(self.tableWidget.item(i,1).text(),temp,j[1],j[2])
-						
 						if ("arcgis") in temp:
 							temp = str(temp).replace("[","").replace("]","").replace('"','').replace(",","").replace("'","")
 							wr.writerow([self.tableWidget.item(i,1).text() ,temp,j[3],j[4]])
-							#print(self.tableWidget.item(i,1).text() ,temp,j[3],j[4])
-					
 						if("nominatim") in temp:
 							temp = str(temp).replace("[","").replace("]","").replace('"','').replace(",","").replace("'","")
 							wr.writerow([self.tableWidget.item(i,1).text(),temp,j[5],j[6]])	
-							#print(self.tableWidget.item(i,1).text(),temp,j[5],j[6])
-					
-					
-					
 					if self.tableWidget.cellWidget(i,4).isChecked(): # i,4 --> category3
 						temp=self.tableWidget.cellWidget(i,4).text()
 						if("original") in temp:
 							temp = str(temp).replace("[","").replace("]","").replace('"','').replace(",","").replace("'","")
 							wr.writerow([self.tableWidget.item(i,1).text(),temp,j[1],j[2]])	
-							#print(self.tableWidget.item(i,1).text(),temp,j[1],j[2])
-						
 						if ("arcgis") in temp:
 							temp = str(temp).replace("[","").replace("]","").replace('"','').replace(",","").replace("'","")
 							wr.writerow([self.tableWidget.item(i,1).text() ,temp,j[3],j[4]])
-							#print(self.tableWidget.item(i,1).text() ,temp,j[3],j[4])
-						
 						if("nominatim") in temp:
 							temp = str(temp).replace("[","").replace("]","").replace('"','').replace(",","").replace("'","")
 							wr.writerow([self.tableWidget.item(i,1).text() ,temp,j[5],j[6]])
-							#print(self.tableWidget.item(i,1).text() ,temp,j[5],j[6])
 					break
-							
-				
-				#if self.tableWidget.cellWidget(i,0).isChecked():  #i,0 --> id
-					#temp=self.tableWidget.cellWidget(i,0).text()
-					#checked_list.append(temp)
-				
-			#if self.tableWidget.cellWidget(i,1).isChecked(): # i,1 --> address
-				#temp=self.tableWidget.cellWidget(i,1).text()
-				#checked_list.append(temp)
-				
-				
-				#if self.tableWidget.cellWidget(i,2).isChecked():  # i,2 --> category1
-					#temp=self.tableWidget.cellWidget(i,2).text()
-					##checked_list.append(temp)
-					##wr.writerow([self.tableWidget.item(i,0).text(),self.tableWidget.item(i,1).text(),self.tableWidget.cellWidget(i,2).text()])
-					#wr.writerow([self.tableWidget.item(i,0).text(),self.tableWidget.item(i,1).text(),self.tableWidget.cellWidget(i,2).text()])
-				
-				#if self.tableWidget.cellWidget(i,3).isChecked():  #i,3 --> category2
-					#temp=self.tableWidget.cellWidget(i,3).text()
-					##checked_list.append(temp)
-					#wr.writerow([self.tableWidget.item(i,0).text(),self.tableWidget.item(i,1).text() ,self.tableWidget.cellWidget(i,3).text()])
-				
-				
-				#if self.tableWidget.cellWidget(i,4).isChecked():  # i,4 --> category3
-					#temp=self.tableWidget.cellWidget(i,4).text()
-					##checked_list.append(temp)
-					#wr.writerow([self.tableWidget.item(i,0).text(),self.tableWidget.item(i,1).text() ,self.tableWidget.cellWidget(i,4).text()])
-			
 		myfile.close()
-		##input_csv = self.choosepoifilefilechoosenfile.text()
-		
-		#with open(exp_path+"\\model_deployment_results\\predictions_converted_by_user.csv", newline='', encoding='utf-8') as csv_file:
-			##print("-------")    
-			#with open(exp_path+"\\model_deployment_results\\predictions_converted_by_user_last.csv","w",newline='') as myfile, open(input_csv,'r',newline='', encoding='utf-8')as inputfile: #
-				##print('-------')
-				#csv_test_input=csv.reader(inputfile,quoting=csv.QUOTE_MINIMAL,skipinitialspace='True')
-				#next(csv_test_input) #ignore csv headers
-				#csv_data = csv.reader(csv_file,quoting=csv.QUOTE_MINIMAL)    #,skipintialspace='True') ###     utf-8
-				#wr=csv.writer(myfile)
-				#wr.writerow(['address','results','x','y']) ###
-				#for row in csv_data:
-					
-					#if len(str(row))>2:
-						##a=row[0] # id
-						
-						#b=row[1] # address
-						#c=row[2] # predictions
-						#b=b.replace('"',"")
-						##c=c.replace('"',"").replace("[","").replace("]","").replace("(","").replace(")","").replace(",","")
-						
-						##temp1 = (c.split(' ',2))[:2]
-						##print(temp1)
-						
-						#for j in csv_test_input:
-							#if("'original'") in c:
-								#c = str(c).replace("[","").replace("]","").replace('"','').replace(",","").replace("'","")
-								#wr.writerow([b,c,j[1],j[2]])
-							#if ("'arcgis'") in c:
-								#c = str(c).replace("[","").replace("]","").replace('"','').replace(",","").replace("'","")
-								#wr.writerow([b,c,j[3],j[4]])
-							#if("'nominatim") in c:
-								#c = str(c).replace("[","").replace("]","").replace('"','').replace(",","").replace("'","")
-								#wr.writerow([b,c,j[5],j[6]])
-							#break
-						
-						#if any(row): #remove empty lines in csv file
-							#wr.writerow([a,b,c])
-					
-		#os.remove(exp_path+"\\model_deployment_results\\predictions_converted_by_user.csv")
-			
-		#with open(exp_path+"\\predictions_converted_by_user.csv", 'w') as new_file:
-		#shutil.copy(myfile.name,exp_path +"\\model_deployment_results" + "\\predictionsrplconverted.csv") 	
-			
-			#checked_list.append([i,5])
-		#myfile.close()
 		return user_path		
 
-	def auto_selectbtn_clicked(self): # That button selects the results that are above 60% and checks the appropriate checkbox in the table 
+	def auto_selectbtn_clicked(self): # That button selects the category that has the maximum result and checks the appropriate checkbox in the table 
 		csv_predictions = self.last_exp_file() + "\\model_deployment_results\\predictionsrplconverted.csv"
 		with open(csv_predictions,'r',newline='',encoding=' utf-8') as csv_results:
 			csv_reader = csv.reader(csv_results,quoting=csv.QUOTE_MINIMAL,skipinitialspace='True')
@@ -712,23 +435,7 @@ class GeoCodingDialog(QtWidgets.QDialog, FORM_CLASS):
 				if temp == ((str(a.split(' ',6)[5:6]).replace("[","").replace("'","").replace("]",""))):
 					self.tableWidget.cellWidget(count,4).setCheckState(Qt.Checked)
 				count+=1	
-					
-			# csv_reader = csv.reader(csv_results,quoting=csv.QUOTE_MINIMAL,skipinitialspace='True')
-			# count=0
-			# for row in csv_reader:
-				# a=row[2]
-				# if (float(str(a.split(' ',2)[1:2]).replace("[","").replace("'","").replace("]",""))) > 0.60:
-					# self.tableWidget.cellWidget(count,2).setCheckState(Qt.Checked)
-				# if (float(str(a.split(' ',4)[3:4]).replace("[","").replace("'","").replace("]",""))) > 0.60:	
-					# self.tableWidget.cellWidget(count,3).setCheckState(Qt.Checked)
-				# if (float(str(a.split(' ',6)[5:6]).replace("[","").replace("'","").replace("]",""))) > 0.60:
-					# self.tableWidget.cellWidget(count,4).setCheckState(Qt.Checked)
-				# count+=1
-	
-	
-	
 	def load_user_btn_clicked(self):
-
 		try:	
 			QMessageBox.information(self,"INFO","Load User Choices")
 			uri_user_choices = "file:///" + user_path + "?delimiter={}&xField={}&yField={}".format(",", "x", "y")
@@ -758,37 +465,13 @@ class GeoCodingDialog(QtWidgets.QDialog, FORM_CLASS):
 		except NameError:
 			QMessageBox.warning(self,"WARNING","Check pois from results table and press select.Then your choices may be loaded.")
 	
-	
-	def cell_was_clicked(self,row,column):
-		#items = []
-		cell_click = 'Row %d and Column %d was clicked' %(row,column)
-		print(cell_click)
-		QMessageBox.information(self,'Cell Info',cell_click)
-		
-		
-		
 	#########################################################################
 	#                  Connection table results - Pois in layer             #
 	#########################################################################	
-		
-	#def tableWidgetpopup(self,event):
-		#self.popupMenu  = QMenu()
-		#Action3 = QAction("Go to User's Choice Road ",self)
-		
-		#self.popupMenu.addAction(Action3)
-		#Action3.triggered.connect(self.gotoinitpoisfeature)
-		##add other required actions
-		#self.popupMenu.popup(QCursor.pos())
 	
-	###############################################################################
 	def tableWidgetpopup2(self,event):
 		self.popupMenu2 = QMenu(self)
 		subMenu = QMenu(self.popupMenu2)
-		#titleMenu = QCoreApplication.translate("Table Menu","Go to pois")
-		#subMenu.setTitle(titleMenu)
-		#subMenu.addAction(QCoreApplication.translate("Table Menu", "Show"))
-		#subMenu.addSeparator()
-		
 		Action2 = QAction("Show current address categories in map",self)
 		self.popupMenu2.addAction(Action2)
 		
@@ -803,122 +486,6 @@ class GeoCodingDialog(QtWidgets.QDialog, FORM_CLASS):
 		Action3.triggered.connect(self.goto_user_pois_feature)
 		Action4.triggered.connect(self.max_prob_point)
 	########################################################
-	def test_pois(self):
-		canvas=QgsMapCanvas()
-		canvas.enableAntiAliasing(True)
-		urlWithParams = 'type=xyz&url=https://a.tile.openstreetmap.org/%7Bz%7D/%7Bx%7D/%7By%7D.png&zmax=19&zmin=0&crs=EPSG4326'
-		rlayer = QgsRasterLayer(urlWithParams, 'OpenStreetMap', 'wms')
-		canvas.setExtent(rlayer.extent())
-		canvas.setLayers([rlayer])
-		canvas.show()
-		#time.sleep(2)
-	#########################################################	
-		
-	
-	
-	def address_categories(self):
-		
-		#canvas settings
-		canvas = QgsMapCanvas()
-		#canvas.setCanvasColor(Qt.white)
-		canvas.enableAntiAliasing(True)
-		
-		#define open street map
-		# xml = """<GDAL_WMS>
-		# <Service name="TMS">
-		# <ServerUrl>http://tile.openstreetmap.org/${z}/${x}/${y}.png</ServerUrl>
-		# </Service>
-		# <DataWindow>
-		# <TileLevel>18</TileLevel>
-		# <TileCountX>1</TileCountX>
-		# <TileCountY>1</TileCountY>
-		# <YOrigin>top</YOrigin>
-		# </DataWindow>
-		# <Projection>EPSG:4326</Projection>
-		# <BlockSizeX>256</BlockSizeX>
-		# <BlockSizeY>256</BlockSizeY>
-		# <BandsCount>3</BandsCount>
-		# <Cache />
-		# </GDAL_WMS>"""
-		
-		#define open street map
-		urlWithParams = 'type=xyz&url=https://a.tile.openstreetmap.org/%7Bz%7D/%7Bx%7D/%7By%7D.png&zmax=19&zmin=0&crs=EPSG4326'
-		rlayer = QgsRasterLayer(urlWithParams, 'OpenStreetMap', 'wms')
-		
-		#QgsMapLayerRegistry.instance().addMapLayer(rlayer,False)
-		
-		##file_nominatim = self.last_exp_file() + "\\model_deployment_results\\nominatim.csv"
-		##uri_nominatim = "file:///" + file_nominatim +"?delimiter={}&xField={}&yField={}".format(",","x_nominatim","y_nominatim")
-		
-		##layer_nominatim = QgsVectorLayer(uri_nominatim, "Roads Classified (nominatim)", 'delimitedtext') # layer constructor
-		##layer_nominatim.setCrs(QgsCoordinateReferenceSystem(4326))
-		
-		#layers =[]
-		##layers.append(layer_nominatim)
-		#layers.append(rlayer)
-		
-		#QgsProject.instance().addMapLayer(rlayer)
-		canvas.setExtent(rlayer.extent())
-		#canvas.setExtent(layer_nominatim.extent())
-		#canvas.setLayerSet([QgsMapCanvasLayer(rlayer)])
-		#canvas.setLayers(layers)
-		canvas.setLayers([rlayer])
-		canvas.show()
-		
-		#time.sleep(3)
-		
-		
-		# extent = QgsRectangle()
-		# QgsProject.instance().addMapLayer(rlayer)
-		# extent.combineExtentWith(rlayer.extent())
-		
-		# file_nominatim = self.last_exp_file() + "\\model_deployment_results\\nominatim.csv"
-		# uri_nominatim = "file:///" + file_nominatim +"?delimiter={}&xField={}&yField={}".format(",","x_nominatim","y_nominatim")
-		# layer_nominatim = QgsVectorLayer(uri_nominatim, "Roads Classified (nominatim)", 'delimitedtext') # layer constructor
-		
-		# layers =[]
-		# layers.append(layer_nominatim)
-		# extent.scale(1.1)
-		# canvas.setExtent(extent)
-		# canvas.setLayers(layers)
-		# canvas.show()
-		
-		# root = QgsProject.instance().layerTreeRoot()
-		# bridge = QgsLayerTreeMapCanvasBridge(root, canvas)
-		# model = QgsLayerTreeModel(root)
-		# model.setFlag(QgsLayerTreeModel.AllowNodeReorder)
-		# model.setFlag(QgsLayerTreeModel.AllowNodeRename)
-		# model.setFlag(QgsLayerTreeModel.AllowNodeChangeVisibility)
-		# model.setFlag(QgsLayerTreeModel.ShowLegend)
-		# view = QgsLayerTreeView()
-		# view.setModel(model)
-		# view.show()
-		
-		# layout = QHBoxLayout()
-		# layout.addWidget(view)
-		# layout.addWidget(canvas)
-		# docked = QDockWidget()
-		# docked.setContentsMargins(9, 9, 9, 9)
-		# dockedWidget = QWidget()
-		# docked.setWidget(dockedWidget)
-		# docked.setWindowTitle('Individual Pois')
-		# dockedWidget.setLayout(layout)
-		# docked.show()
-		
-		# canvas.refresh()
-		# canvas.show()
-		# time.sleep(3)
-		
-		#if rlayer.isValid():
-			#urlWithParams = 'type=xyz&url=https://a.tile.openstreetmap.org/%7Bz%7D/%7Bx%7D/%7By%7D.png&zmax=19&zmin=0&crs=EPSG4326'
-			#rlayer = QgsRasterLayer(urlWithParams, 'OpenStreetMap', 'wms') 
-			#QgsProject.instance().addMapLayer(rlayer)
-		#else:
-			#print('invalid layer')
-		
-		
-		###############################################################################
-	
 	def max_prob_point(self):
 		r=self.tableWidget.selectionModel().currentIndex().row()
 		c=self.tableWidget.selectionModel().currentIndex().column()
@@ -927,48 +494,28 @@ class GeoCodingDialog(QtWidgets.QDialog, FORM_CLASS):
 		poi_max.append((self.tableWidget.cellWidget(r,2)).text())
 		poi_max.append((self.tableWidget.cellWidget(r,3)).text())
 		poi_max.append((self.tableWidget.cellWidget(r,4)).text())
-		#poi_max = str(poi_max).replace("arcgis, ","").replace("nominatim, ","").replace("original, ","").replace(" ","").replace("'","")
-		#print(poi_max)
-		#temp33=max(poi_max)
 		for i in poi_max:
 			result = list(map(lambda i: float(i.replace("arcgis ","").replace("nominatim ","").replace("original ","").replace(" ","").replace("'","")), poi_max))
-			#print(max(result))
-		#re_sult= max((result))
-		
-		print(max((result)))  # result has only the float results (numbers)
-		print(poi_max)       # poi_max has all categories
-		
+			
+		# result has only the float results (numbers)
+		# poi_max has all categories
 		if str(max((result))) in str((self.tableWidget.cellWidget(r,2).text())):
 			temp111=(self.tableWidget.cellWidget(r,2).text())
 			temp111=str(temp111.replace(",",""))
 			QMessageBox.information(self,"INFO","Max is: %s"%temp111,QMessageBox.Close)
 			self.tableWidget.cellWidget(r,2).setCheckState(Qt.Checked)
-			#print(str(temp111.split()[:1]).replace("'",""))
 			answer_msg = QMessageBox.question(self,"REDIRECTION","Redirect to max poi in map?",QMessageBox.Yes | QMessageBox.No)
 			user_click = self.select_from_tableWidget()
-			
 			if answer_msg== QMessageBox.Yes:
-				
 				alllayers = self.myiface.mapCanvas().layers()
 				for layer in alllayers:
-					#print(type(temp111))
-					#print(temp111)
 					temp112= str(temp111.split()[:1]).replace("'","").replace("[","").replace("]","")
-					#print()
-					#print(temp112)
-					#print()
-					#print(str(layer.name()))
 					QMessageBox.information(self,"INFO","HERE")
 					if  "OpenStreetMap" in str(layer.name()):
 						continue					
-					
 					elif "Roads Classified (nominatim)" in str(layer.name()):
 						QMessageBox.information(self,"INFO","nominatim")
-						if (temp112) in str(layer.name()):	#use temp111.split		# "Roads Classified (nominatim)"     if nominatim is loaded zoom to nominatim										
-							#print(type(temp111))
-							#print(temp111)
-							#print(temp112)
-							
+						if (temp112) in str(layer.name()):											
 							current_Layer=layer																		
 							current_Layer.removeSelection()																	
 							current_Layer.selectByExpression("\"address\" = '{}'".format(user_click),QgsVectorLayer.SetSelection)	
@@ -977,7 +524,6 @@ class GeoCodingDialog(QtWidgets.QDialog, FORM_CLASS):
 							canvas = qgis.utils.iface.mapCanvas()
 							canvas.zoomToSelected(current_Layer) 
 							print("Categ 1 zoom nominatim")
-							
 					elif "Roads Classified (arcgis)" in str(layer.name()):
 						QMessageBox.information(self,"INFO","arcgis")
 						if (temp112) in str(layer.name()):
@@ -988,8 +534,6 @@ class GeoCodingDialog(QtWidgets.QDialog, FORM_CLASS):
 							self.myiface.mapCanvas().setExtent(box)
 							canvas = qgis.utils.iface.mapCanvas()
 							canvas.zoomToSelected(current_Layer)
-							print("Categ 1 zoom arcgis")
-							
 					elif "Roads Classified (original)" in str(layer.name()):
 						QMessageBox.information(self,"INFO","original")
 						if (temp112) in str(layer.name()):
@@ -1005,10 +549,8 @@ class GeoCodingDialog(QtWidgets.QDialog, FORM_CLASS):
 					else:
 						QMessageBox.warning(self,"Loaded Layers","Redirection to poi in layer failed.Please load the layer.",QMessageBox.Yes)
 						break
-						
 			else:
 				pass
-		
 		if str(max((result))) in str((self.tableWidget.cellWidget(r,3).text())):
 			temp111=(self.tableWidget.cellWidget(r,3).text())
 			QMessageBox.information(self,"INFO","Max is: %s"%temp111)
@@ -1018,24 +560,11 @@ class GeoCodingDialog(QtWidgets.QDialog, FORM_CLASS):
 			if answer_msg== QMessageBox.Yes:
 				alllayers = self.myiface.mapCanvas().layers()
 				for layer in alllayers:
-					#print(type(temp111))
-					#print(temp111)
 					temp112= str(temp111.split()[:1])
-					#print()
-					#print(temp112)
-					#print()
-					#print(str(layer.name()))
-					
 					if "OpenStreetMap" in str(layer.name()):
 						continue
-					
-					
 					if "Roads Classified (nominatim)" in str(layer.name()):
-						if (temp112) in str(layer.name()):	#use temp111.split		# "Roads Classified (nominatim)"     if nominatim is loaded zoom to nominatim										
-							#print(type(temp111))
-							#print(temp111)
-							#print(temp112)
-						
+						if (temp112) in str(layer.name()):											
 							current_Layer=layer																		
 							current_Layer.removeSelection()																	
 							current_Layer.selectByExpression("\"address\" = '{}'".format(user_click),QgsVectorLayer.SetSelection)	
@@ -1067,11 +596,8 @@ class GeoCodingDialog(QtWidgets.QDialog, FORM_CLASS):
 					else:
 						QMessageBox.warning(self,"Loaded Layers","Redirection to poi in layer failed.Please load the layer.",QMessageBox.Yes)
 						break
-						
 			else:
 				pass
-			
-			
 		if str(max((result))) in str((self.tableWidget.cellWidget(r,4).text())):
 			temp111=(self.tableWidget.cellWidget(r,4).text())
 			QMessageBox.information(self,"INFO","Max is: %s"%temp111)
@@ -1081,23 +607,11 @@ class GeoCodingDialog(QtWidgets.QDialog, FORM_CLASS):
 			if answer_msg== QMessageBox.Yes:
 				alllayers = self.myiface.mapCanvas().layers()
 				for layer in alllayers:
-					#print(type(temp111))
-					#print(temp111)
 					temp112= str(temp111.split()[:1])
-					#print()
-					#print(temp112)
-					#print()
-					#print(str(layer.name()))
-					
 					if "OpenStreetMap" in str(layer.name()):
 						continue					
-					
 					if "Roads Classified (nominatim)" in str(layer.name()):
-						if (temp112) in str(layer.name()):	#use temp111.split		# "Roads Classified (nominatim)"     if nominatim is loaded zoom to nominatim										
-							#print(type(temp111))
-							#print(temp111)
-							#print(temp112)
-						
+						if (temp112) in str(layer.name()):											
 							current_Layer=layer																		
 							current_Layer.removeSelection()																	
 							current_Layer.selectByExpression("\"address\" = '{}'".format(user_click),QgsVectorLayer.SetSelection)	
@@ -1129,7 +643,6 @@ class GeoCodingDialog(QtWidgets.QDialog, FORM_CLASS):
 					else:
 						QMessageBox.warning(self,"Loaded Layers","Redirection to poi in layer failed.Please load the layer.",QMessageBox.Yes)
 						break
-						
 			else:
 				pass
 		QWidget.update(self)
@@ -1137,33 +650,10 @@ class GeoCodingDialog(QtWidgets.QDialog, FORM_CLASS):
 	def select_from_tableWidget(self):
 		r=self.tableWidget.selectionModel().currentIndex().row()
 		c=self.tableWidget.selectionModel().currentIndex().column()
-		#print(self.tableWidget.item(r,0).text()) #self.tableWidget.item(r,0).text() -> refers to id (poi_id) 
-		print(self.tableWidget.item(r,1).text())
-		#print(self.tableWidget.cellWidget(r,2).text())
-		#print(self.tableWidget.cellWidget(r,3).text())
-		#print(self.tableWidget.cellWidget(r,4).text())
 		return self.tableWidget.item(r,1).text() # .item(r,1).text --> refers to address(r,1)
-	
-	
 	def goto_user_pois_feature(self):
-		#poiid=self.select_from_tableWidget()
-		#print(poiid)
-		
 		address = self.select_from_tableWidget()
-		#print(address)
-		
-		#print("----")              utf-8
-		#print(alllayers.name())
 		alllayers = self.myiface.mapCanvas().layers()
-		
-		#alllayers = QgsProject.instance().layerTreeRoot().findLayers()
-		
-		#while "Roads Classified User Choices" not in alllayers:
-			#QMessageBox.warning(self,"CAUTION","User choices should be loaded first")
-			#break
-		
-		
-		
 		layer_names=[]
 		for layer in alllayers:
 			layer_names.append(layer.name())
@@ -1176,21 +666,9 @@ class GeoCodingDialog(QtWidgets.QDialog, FORM_CLASS):
 				canvas = qgis.utils.iface.mapCanvas()
 				canvas.zoomToSelected(current_Layer) 
 				self.myiface.mapCanvas().refresh()
-				#print(layer.name())
-			#else:
-				#QMessageBox.warning(self,"CAUTION","User choices should be loaded first")
-				
-			
-			
 		if ("Roads Classified User Choices" not in layer_names):
-			##print(alllayers.name())
 			QMessageBox.warning(self,"CAUTION","User choices should be loaded first")
-
-		#self.myiface.mapCanvas().refresh()
-		
 	def show_address_categories(self):
-		#with open(file_original,'w',newline='') as original , open(file_arcgis,'w',newline='') as arcgis , open(file_nominatim,'w',newline='') as nominatim:
-	
 		user_click = self.select_from_tableWidget()		
 		loaded_layers = self.myiface.mapCanvas().layers() #all current loaded layers		
 		for layer in loaded_layers:												   
@@ -1202,13 +680,6 @@ class GeoCodingDialog(QtWidgets.QDialog, FORM_CLASS):
 				self.myiface.mapCanvas().setExtent(box)																	
 				canvas = qgis.utils.iface.mapCanvas()
 				canvas.zoomToSelected(current_Layer) 
-				#layer_settings_nom = QgsPalLayerSettings()
-				#layer_settings_nom.fieldName = "address"
-				#layer_settings_nom.fieldName =  "nominatim"
-				#layer_settings_nom = QgsVectorLayerSimpleLabeling(layer_settings_nom)
-				#layer.setLabelsEnabled(True)
-				#layer.setLabeling(layer_settings_nom)
-				
 			if ((layer.name()) == "Roads Classified (arcgis)"):			#if arcgis is loaded zoom to arcgis
 				current_Layer=layer
 				current_Layer.removeSelection()
@@ -1217,13 +688,6 @@ class GeoCodingDialog(QtWidgets.QDialog, FORM_CLASS):
 				self.myiface.mapCanvas().setExtent(box)
 				canvas = qgis.utils.iface.mapCanvas()	
 				canvas.zoomToSelected(current_Layer)
-				#layer_settings_arc = QgsPalLayerSettings()
-				#layer_settings_arc.fieldName = "address" + "arcgis"
-				#layer_settings_arc.fieldName =  "arcgis"
-				#layer_settings_arc = QgsVectorLayerSimpleLabeling(layer_settings_arc)
-				#layer.setLabelsEnabled(True)
-				#layer.setLabeling(layer_settings_arc)
-																					
 			if ((layer.name()) == "Roads Classified (original)"):		#if original is loaded zoom to original
 				current_Layer=layer											
 				current_Layer.removeSelection()											
@@ -1232,13 +696,6 @@ class GeoCodingDialog(QtWidgets.QDialog, FORM_CLASS):
 				self.myiface.mapCanvas().setExtent(box)
 				canvas = qgis.utils.iface.mapCanvas()
 				canvas.zoomToSelected(current_Layer)
-				#layer_settings_orig = QgsPalLayerSettings()
-				#layer_settings_orig.fieldName = "address" + "original"
-				#layer_settings_orig.fieldName = "original"
-				#layer_settings_orig = QgsVectorLayerSimpleLabeling(layer_settings_orig)
-				#layer.setLabelsEnabled(True)
-				#layer.setLabeling(layer_settings_orig)
-		
 		self.myiface.mapCanvas().refresh()		
 		if (("Roads Classified (nominatim)" not in loaded_layers) and ("Roads Classified (arcgis)" not in loaded_layers) and ("Roads Classified (original)" not in loaded_layers)):
 			QMessageBox.information(self,"INFO","Please load classification results first.")
