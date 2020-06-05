@@ -8,7 +8,7 @@
                               -------------------
         begin                : 2019-12-18
         git sha              : $Format:%H$
-        copyright            : (C) 2019 by Eratosthenis SA 2019
+        copyright            : (C) 2019 by Eratosthenis SA Ilias Varkas 2019
         email                : iliasvrk@gmail.com
  ***************************************************************************/
 
@@ -30,14 +30,14 @@ from PyQt5.QtWidgets import QPushButton,QFileDialog,QProgressDialog,QProgressBar
 from PyQt5.QtWidgets import QMessageBox,QDialog
 from PyQt5.QtCore import QSize,QTimer,QThread, pyqtSignal
 from PyQt5.QtGui import *  
-#from PyQt5.QtGui import QProgressDialog, QProgressBar
+
 from PyQt5.QtCore import *  
 from qgis.utils import iface
 from PyQt5 import QtCore,QtGui,QtWidgets
 # Initialize Qt resources from file resources.py
 from .resources import *
 # Import the code for the dialog
-from .geocoding_dialog import GeoCodingDialog
+from .geo_coding_dialog import GeoCodingDialog
 import os.path
 from qgis.core import *
 from qgis.gui import *
@@ -173,11 +173,11 @@ class GeoCoding:
 
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
-
-        icon_path = ':/plugins/geocoding/icon.png'
+        icon_path = '.\\icon2.png'
+                
         self.add_action(
             icon_path,
-            text=self.tr(u'Geocoding'),
+            text=self.tr(u'LGM-Geocoding'),
             callback=self.run,
             parent=self.iface.mainWindow())
 
@@ -212,8 +212,4 @@ class GeoCoding:
         result = self.dlg.exec_()
         # See if OK was pressed
         if result:
-            # Do something useful here - delete the line containing pass and
-            # substitute with your code.
-			
-			
             pass
