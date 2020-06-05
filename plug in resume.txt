@@ -5,24 +5,17 @@ Geocoding plugin is a plugin for QGIS classifying roads.
 *****
 The default installation path for QGIS plugins,where the plugins folder should be installed is defined as follows:
 
-
-
 example: C:\\Users\\{text_user}\\AppData\\Roaming\\QGIS\\QGIS3\\profiles\\default\\python\\plugins
 
-
 To test the plugin,simply paste the folder in the path above
-
 In QGIS python terminal:
 (default_path=QgsApplication.qgisSettingsDirPath() + "\python\plugins"  )
 
 The plugin is tested on windows operating system
-
 *****
-
 The plugin is divided in two sections:
-1. Model Training    
-2. Model Running
-
+1. Model Training Section    
+2. Model Running Section
 *****
 This is geocoding version 1.1
 *****
@@ -52,7 +45,7 @@ As regards the training data button and experiment path button,  right click on 
 Furthermore, after training the algorithm, there is the Model Running section.
 ------
 step 1 
-The first button in this section is the Poi file 2 classify button.
+The first button in this section is the File to classify button.
 Here the user defines the csv file that is needed to be classified.
 The full path of the selected file is shown in the field next to that button.
 ------
@@ -65,47 +58,34 @@ When the Model Deployment is executed, the user can press the Show Recommendatio
 ------
 step 4
 When the results are loaded in the results table, the user is able to select the most sufficient result selecting the appropriate checkbox.
-When the user finishes selecting the appropriate results, then the update button can be pressed and a new file is created, where the choices of the user are stored in the experiments path (predictions_converted_by_user_last.csv).
+When the user finishes selecting the appropriate results, then the Select button can be pressed and a new file is created, where the choices of the user are stored. User defines where the file is going to be saved.
 ------
 step 5
+The user can select the maximum result for each category by pressing Auto Select button.
+------
+step 6
 Next step is the Load Classification Results button where each category (original,arcgis,nominatim) is loaded as a separate layer in QGIS.
 Each road is displayed as a point of interest in a map. The user can define the appropriate CRS before the pois are loaded.Each layer is represented with a unique color and all the layers can be represented simultaneously, so that the user can have a visual depiction of the results.
 ------
-step 6
+step 7
 Last step is the Load User Results button. If the user has chosen the right category for each road (step 4), these choices are loaded as a separate layer in QGIS.That layer loads with greater significance over the rest layers (is put on the top of the layers list)
 
 
-Also, the user can right click on the desired road in results table, a pop up choice is raised (Go to User's Choice Road) and then the layer is focused on that road.The poi is highlighted yellow.The user should first load the user results as a layer(step 6) and then use this feature.
+Also, the user can right click on the desired road in results table, a pop up menu is raised with three functions available.
+
+*Show current address categories in map.
+The active map focuses on all three categories, so that the user can define which result is the best.
+Note that each category is depicted with different symbol for better separation among them
+
+*Go to User's Choice Road 
+The layer is focused on that road.The poi is highlighted yellow.The user should first load the user results as a layer(step 7) and then use this feature.
+
+*Go to maximum probability point
+The active map layer focuses on the result with the maximum rate. The poi is highlighted yellow. No need to select any checkbox from the Results Table area. 
+
 Furthermore, when clicking on a road (poi) for each layer, a table with information is shown.
  
 Note that with right clicking on each button in Model Running section, a pop up selection appears (what's this) that explains to the user the use of each button.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
